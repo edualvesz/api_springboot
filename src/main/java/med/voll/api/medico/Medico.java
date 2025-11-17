@@ -1,11 +1,12 @@
 package med.voll.api.medico;
 
-import med.voll.api.endereco.DadosEndereco;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import med.voll.api.endereco.Endereco;
+import med.voll.api.endereco.DadosEndereco;
 
 @Table(name = "medicos")
 @Entity(name = "Medico")
@@ -13,9 +14,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")
+public class Medico {
 
-public class Medico 
-{
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String nome;
@@ -27,7 +27,7 @@ public class Medico
     private Especialidade especialidade;
 
     @Embedded
-    private DadosEndereco endereco;
+    private Endereco endereco;   // <-- CORRIGIDO
 
     public Medico(DadosCadastroMedico dados) {
         this.nome = dados.nome();
@@ -35,12 +35,18 @@ public class Medico
         this.telefone = dados.telefone();
         this.crm = dados.crm();
         this.especialidade = dados.especialidade();
-        this.endereco = new DadosEndereco(dados.endereco().logradouro(), 
-        dados.endereco().bairro(), 
-        dados.endereco().cep(), 
-        dados.endereco().cidade(), 
-        dados.endereco().uf(), 
-        dados.endereco().complemento(), 
-        dados.endereco().numero());
+        this.endereco = new Endereco(dados.endereco()); // <-- CORRIGIDO
+    }
+
+    public void atualizarInformacoes(DadosAtualizacaoMedico dados) {
+        if (dados.nome() != null) {
+            this.nome = dados.nome();
+        }
+        if (dados.telefone() != null) {
+            this.telefone = dados.telefone();
+        }
+        if (dados.endereco() != null) {
+            this.endereco.atualizarInformacoes(dados.endereco()); // <-- agora funciona
+        }
     }
 }
