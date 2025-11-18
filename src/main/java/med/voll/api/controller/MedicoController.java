@@ -25,6 +25,7 @@ import med.voll.api.medico.MedicoRepository;
 import med.voll.api.medico.DadosListagemMedico;
 import med.voll.api.medico.DadosAtualizacaoMedico;
 
+
 @RestController
 @RequestMapping("/medicos")
 
@@ -45,7 +46,7 @@ public class MedicoController
     @GetMapping
     public Page<DadosListagemMedico> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
         // aqui convertemos cada Medico da lista em um DadosListagemMedico
-        return repository.findAll(paginacao).map(DadosListagemMedico::new);
+        return repository.findByAtivoTrue(paginacao).map(DadosListagemMedico::new);
     }
 
     @PutMapping
@@ -59,6 +60,7 @@ public class MedicoController
     @Transactional
     // excluir um medico por id
     public void excluir(@PathVariable Long id) {
-        repository.deleteById(id);
+        var medico = repository.getReferenceById(id);
+        medico.excluir();
     }
 }
