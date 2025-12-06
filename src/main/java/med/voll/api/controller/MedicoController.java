@@ -3,9 +3,11 @@ package med.voll.api.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestClient.ResponseSpec;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import lombok.experimental.var;
 
 import java.util.List;
 
@@ -37,15 +39,20 @@ public class MedicoController
     // automaticamente cria uma instancia do repository e injeta aqui
     @Autowired
     private MedicoRepository repository;
-    //post é usado para criar recursos
+    //post ï¿½ usado para criar recursos
     @PostMapping
-    //transactional garante que se der algum erro na hora de salvar, ele desfaz tudo que foi feito no banco até aquele ponto
+    //transactional garante que se der algum erro na hora de salvar, ele desfaz tudo que foi feito no banco atï¿½ aquele ponto
     @Transactional
-    public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroMedico dados) {
+    public ResponseEntity cadastrar(@RequestBody @Valid DadosCadastroMedico dados, UriComponentsBuilder uriBuilder) {
+        var medico = new Medico(dados);
         repository.save(new Medico(dados));
+         // cria a URI do recurso que foi criado
+        var uri = uriBuilder.path("/medicos/{id}").buildAndExpand(medico.getId()).toUri();
+        // retorna uma resposta com status 201 (Created) e o corpo da resposta com os dados do medico criado
+        return ResponseEntity.created(uri).body(new DadosDetalhamentoMedico(medico));
     }
 
-    // get é usado para listar recursos
+    // get ï¿½ usado para listar recursos
     @GetMapping
     public ResponseEntity<Page<DadosListagemMedico>> listar(@PageableDefault(size = 10, sort = {"nome"}) Pageable paginacao) {
         // aqui convertemos cada Medico da lista em um DadosListagemMedico
@@ -58,7 +65,7 @@ public class MedicoController
     public ResponseEntity atualizar(@RequestBody @Valid DadosAtualizacaoMedico dados) {
         var medico = repository.getReferenceById(dados.id());
         medico.atualizarInformacoes(dados);
-
+        // retorna uma resposta com status 200 (OK) e o corpo da resposta com os dados do medico atualizado
         return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
     }
 
