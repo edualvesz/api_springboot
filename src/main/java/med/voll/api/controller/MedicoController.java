@@ -78,4 +78,12 @@ public class MedicoController
          // retorna uma resposta vazia com status 204 (No Content)
         return ResponseEntity.noContent().build();
     }
+
+    @GetMapping("/{id}")
+    // excluir um medico por id
+    public ResponseEntity detalhar(@PathVariable Long id) {
+        var medico = repository.getReferenceById(id);
+        return ResponseEntity.ok(new DadosDetalhamentoMedico(medico));
+    }
+
 }
